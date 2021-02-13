@@ -9,7 +9,7 @@ struct edge{
 };
 int NA_KRAWEDZIACH=0;
 
-/// NA KRAWĘDZIACH:
+/// NA KRAWĘDZIACH :
 // int n, a, b, c;
 // vector<edge> lS[10005];
 // int head[10005];
