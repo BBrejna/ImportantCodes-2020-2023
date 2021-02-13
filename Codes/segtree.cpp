@@ -11,9 +11,9 @@ ll T[1<<21], p[1<<21], shift=1<<20;
 
 void lazy(cint& u, const ll& leafs) {
     T[u]+=p[u]*leafs;
-    if (u>shift) {
-        p[u<<1]+=p[u]>>1;
-        p[u<<1|1]+=p[u]>>1;
+    if (u<shift) {
+        p[u<<1]+=p[u];
+        p[u<<1|1]+=p[u];
     }
     p[u]=0;
 }
@@ -37,4 +37,8 @@ ll ask(cint& l, cint& r, cint& x=0, cint& y=shift-1, cint& u=1) {
     if (l <= x && y <= r) return T[u];
     int m=(x+y)>>1;
     return ask(l,r,x,m,u<<1)+ask(l,r,m+1,y,u<<1|1);
+}
+
+int32_t main() {
+    return 0;
 }
