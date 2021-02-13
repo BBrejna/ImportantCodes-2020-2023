@@ -244,24 +244,27 @@ struct bignum {
 	}
 	bignum operator/(const bignum &v) const { return divmod(*this, v); }
 	bignum operator%(const bignum &v) const { return *this-(*this/v)*v; }
-	friend bignum Powmod(bignum &b, long long pot, long long MOD) {
+	friend bignum pow(bignum &b, long long pot, long long MOD) {
 		bignum r = 1;
 		for (b=b%bignum(MOD); pot; pot>>=1, b = (b*b)%MOD)
 			if (pot&1) r = (r*b)%bignum(MOD);
 		return r;
 	}
-	friend bignum Pow(bignum &b, long long pot) {
+	friend bignum pow(bignum &b, long long pot) {
 		bignum r = 1;
 		for (; pot; pot >>= 1, b*=b)
 			if (pot&1) r*=b;
 		return r;
 	}
 };
+bignum gcd(const bignum c, const bignum b) { return b.isZero() ? c : gcd(b,c%b); }
+bignum lcm(const bignum &c, const bignum &b) { return c/gcd(c,b)*b; }
+bignum abs(bignum b) { return b.sign *= b.sign, b; }
 
 int main() {
 	bignum a, b;
 	cin >>a >> b;
-	cout << a*b << "\n";
-	cout << a.abs() << "\n";
+	cout << a+b << " " << a-b << " " << a*b << " " << a/b << "\n";
+	cout << abs(a) << " " << gcd(a,b) << " " << lcm(a,b) << " " << pow(a,10) << " " << pow(a,10,4) << "\n";
     return 0;
 }
