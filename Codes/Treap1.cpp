@@ -90,7 +90,7 @@ struct Treap{
     void print() {
         vector<ll> v;
         print(root, v);
-        for (size_t i = 1; i < v.size(); i++) cout << v[i] << " ";
+        for (size_t i = 0; i < v.size(); i++) cout << v[i] << " ";
         cout << "\n";
     }
     ll find_smaller(Node* v, ll val) {
@@ -101,11 +101,35 @@ struct Treap{
         return r==-1?v->val:r;
     }
     ll find_smaller(ll val) { return find_smaller(root, val); }
-    void add(ll beg, ll val) {
+    void add_val_to_greater_or_equal(ll beg, ll val) {
         auto p = split(root,beg-1);
         p.nd->delta+=val;
         merge(p.st,p.nd);
     }
+	Node* find_kth(Node* v, ll k) {
+        if (sz(v->l)+1 == k) return v;
+        if (sz(v->l) >= k) return find_kth(v->l,k);
+        return find_kth(v->r,k-(sz(v->l)+1));
+    }
+    ll find_kth(ll k) {
+        if (k<1||k>sz(root)) return LLONG_MAX;
+        return find_kth(root, k)->val; 
+    }
+    ll find_bound(Node* v, ll k, ll res=LLONG_MAX) {
+        if (v==NULL) return LLONG_MAX;
+        res = find_bound((v->val>k?v->l:v->r),k);
+        if (v->val >= k) res=min(res,v->val);
+        return res;
+    }
+    ll lower_bound(ll k) { return find_bound(root,k); }
+    ll upper_bound(ll k) { return find_bound(root,k+1); }
+    Node* find(Node*v, ll k) {
+        if (v==NULL) return NULL;
+        if (v->val==k) return v;
+        auto akt = find((v->val>k?v->l:v->r),k);
+        return akt;
+    }
+    Node* find(ll k) { return find(root,k); }
 };
 
 int n, a;
@@ -118,8 +142,9 @@ int32_t main() {
     treap.insert(0LL);
     for (int i = n-1; i >= 0; i--) {
         ll akt=treap.find_smaller(in[i]);
-        treap.add(akt,in[i]);
+        treap.add_val_to_greater_or_equal(akt,in[i]);
         treap.insert(akt);
     } 
+    treap.erase(0);
     treap.print();
 }
