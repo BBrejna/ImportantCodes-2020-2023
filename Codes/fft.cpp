@@ -1,106 +1,76 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+using ld=long double;
+
+#define infll ll(1e18)
+#define inf int(1e9)
+#define st first
+#define nd second
+#define MAXN int(5e4)
+#define MAXV int(6e5+5)
+#define pb push_back
+#define K 16
 
 struct C {
-	double r, i;
-	
-	C operator* (const C &other) const {
-		return C{r * other.r - i * other.i,
-				 r * other.i + i * other.r};
-	}
-	C operator- (const C &other) const {
-		return C{r - other.r, i - other.i};
-	}
-	void operator+= (const C &other) {
-		r += other.r, i += other.i;
-	}
-	void operator/= (const int &n) {
-		r /= n; i /= n;
-	}
+    ld r, i;
+    C(ld _r = 0, ld _i = 0) : r(_r), i(_i) { }
+    const inline C operator+ (const C &c) const { return C{r + c.r, i + c.i}; }
+    const inline C operator- (const C &c) const { return C{r - c.r, i - c.i}; }
+    const inline C operator* (const C &c) const { return C{r * c.r - i * c.i, r * c.i + i * c.r}; }
+    const inline C operator/ (const ld &v) const { return C{r / v, i / v}; }
 };
+constexpr ld pi = acosl(-1);
 
-constexpr double PI = acos(-1);
-
-constexpr int L = 17; /// Druga najmniejsza potęga dwójki większa niż max długość
-
-int rev[1 << L]; /// max n
-void fft(C a[], int n, bool invert) {
-	for(int i = 0; i < n; i++)
-		if(i < rev[i])	swap(a[i], a[rev[i]]);
-	
-	static C wlen_pw[1 << L]; /// max n
-	for(int len = 2; len <= n; len <<= 1) {
-		double ang = 2 * PI / len * (invert ? -1 : +1);
-		int len2 = len >> 1;
-		
-		C wlen{cos(ang), sin(ang)};
-		wlen_pw[0] = C{1, 0};
-		for(int i = 1; i < len2; i++)
-			wlen_pw[i] = wlen_pw[i - 1] * wlen;
-		
-		for(int i = 0; i < n; i += len) {
-			C t, *pu = a + i, *pv = a + i + len2, *pu_end = a + i + len2, *pw = wlen_pw;
-			for(; pu != pu_end; pu++, pv++, pw++) {
-				t = *pv * *pw;
-				*pv = *pu - t;
-				*pu += t;
-			}
-		}
-	}
-	
-	if(invert)
-		for(int i = 0; i < n; i++)
-			a[i] /= n;
-}
-
-void fft_init(int n) {
-	const int log_n = __lg(n);
-	for(int i = 0; i < n; i++) {
-		rev[i] = 0;
-		for(int j = 0; j < log_n; j++)
-			if(i & (1 << j))
-				rev[i] |= 1 << (log_n - 1 - j);
-	}
-}
-
-void mult(vector<int>& a, vector<int>&b, vector<int>& res) {
-    int n=1;
-    while (n<max(a.size(),b.size())) n<<=1;
-    n<<=1;
-    fft_init(n);
-
-    static C fa[1<<L],fb[1<<L];
-    for (int i = 0; i < a.size(); i++) fa[i]={a[i],0};
-    for (int i = 0; i < b.size(); i++) fb[i]={b[i],0};
-    
-    fft(fa,n,0),fft(fb,n,0);
-    for (int i = 0; i < n; i++) {
-        fa[i]=fa[i]*fb[i];
+void fft(vector<C> &a, bool inv=0) {
+    int n=int(a.size());
+    for (int i = 1, j=0; i<n; i++) {
+        int bit=n/2;
+        for(;j&bit;bit>>=1) j^=bit;
+        j^=bit;
+        if (j>i) swap(a[i],a[j]);
     }
-    fft(fa,n,1);
-    res.resize(n);
-    for (int i = 0; i < n; i++) {
-        res[i]=int(fa[i].r+0.5);
+    for (int dlg=2; dlg<=n; dlg*=2) {
+        ld pot=(inv ? -2 : 2)*pi/dlg;
+        C step(cos(pot),sin(pot));
+        for (int i = 0; i < n; i+=dlg) {
+            C akt(1);
+            for (int j = 0; j < dlg/2; j++) {
+                C l=a[i+j];
+                C r=a[i+j+dlg/2]*akt;
+                a[i+j]=(l+r);
+                a[i+j+dlg/2]=(l-r);
+                akt=akt*step;
+            }
+        }
     }
+    if (inv) for (auto &i : a) i=i/ld(n);
 }
 
-int main() {
+
+int32_t main() {
+    cin.tie(0),cout.tie(0),ios::sync_with_stdio(0);
     string a, b;
     cin >> a >> b;
-    vector<int> v1,v2,res;
-    for (int i = a.size()-1; i>=0; i--) v1.push_back(a[i]-'0');
-    for (int i = b.size()-1; i>=0; i--) v2.push_back(b[i]-'0');
-
-    mult(v1,v2,res);
+    int n=int(max(a.size(),b.size()));
+    int k=1;
+    while ((1<<k)<n)k++;
+    int sz=1<<(k+1);
+    vector<C> liczba1(sz), liczba2(sz);
+    for (int i = 0; i < int(a.size()); i++) liczba1[i].r=a[a.size()-1-i]-'0';
+    for (int i = 0; i < int(b.size()); i++) liczba2[i].r=b[b.size()-1-i]-'0';
+    fft(liczba1),fft(liczba2);
+    for (int i = 0; i < sz; i++) liczba1[i]=liczba1[i]*liczba2[i];
+    fft(liczba1,1);
+    vector<int> ans;
     int carry=0;
-    for (int i = 0; i < res.size()-1; i++) {
-        res[i]+=carry;
-        carry=res[i]/10;
-        res[i]%=10;
+    for (int i = 0; i < sz; i++) {
+        int akt=int(liczba1[i].r+0.5)+carry;
+        ans.pb(akt%10);
+        carry=akt/10;
     }
-    while (res.size()>1 && res.back()==0) res.pop_back();
-    reverse(res.begin(),res.end());
-    for (auto i : res) cout << i;
+    if (carry) ans.pb(carry);
+    while (ans.size()>1&&ans.back()==0) ans.pop_back();
+    for (int i = int(ans.size())-1; i>=0; i--) cout << ans[i];
     cout << "\n";
 }
