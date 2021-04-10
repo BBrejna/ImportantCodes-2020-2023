@@ -1,20 +1,22 @@
 #include <bits/stdc++.h>
-#define st first
-#define nd second
-#define ll long long
+
 using namespace std;
 using ull=unsigned long long;
 
-vector<int> primes(int n){
-  vector<bool> s(n + 1);
-  for(ll i = 2; i * i <= n; i++)
-    if(!s[i])
-      for(ll j = i * i; j <= n; j += i)
-        s[j] = true;
-  vector<int> primes;
-  for(int i = 2; i <= n; i++)
-    if(!s[i])  primes.push_back(i);
-  return primes;
+#define st first
+#define nd second
+#define ll long long
+#define pb push_back
+
+vector<int> primes(int n) {
+    vector<int> lp(n+1,0);
+    vector<int> primes;
+    for (int i = 2; i<=n; i++) {
+        if (!lp[i]) lp[i]=i, primes.pb(i);
+        for (int j = 0; j < int(primes.size()) && primes[j]<=lp[i] && i*primes[j]<=n; j++)
+            lp[i*primes[j]]=primes[j];
+    }
+    return primes;
 }
 
 ull modmul(ull a, ull b, ull M) {
@@ -118,10 +120,9 @@ vector<ull> factor(ull n) {
 
 int32_t main() {
     cin.tie(NULL),cout.tie(NULL),ios::sync_with_stdio(0);
-    ull q, n, p;
-    cin >> q;
-    while (q--) {
-      cin >> n >> p;
-      cout << inv_gcd(n,p) << "\n";
-    }
-} 
+    int n;
+    cin >>n;
+    auto res = primes(n);
+    for (auto i : res) cout << i << " ";
+    cout << "\n";
+}
