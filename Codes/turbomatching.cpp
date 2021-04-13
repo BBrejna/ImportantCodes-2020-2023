@@ -1,17 +1,15 @@
-/// Zadanie 'BerSU Ball' codeforces.com
 #include <bits/stdc++.h>
 
 #define pb push_back
+#define inf int(1e9)
+#define MAXV int(5e2)
 
 using namespace std;
 
-int m, n, tab[105], tab2[105], cnt;
-bool used[105],used2[105];
-vector<int> lS[505];
-vector<pair<int,int>>v;
-char c;
-bool vis[505];
-int matched[505];
+int m, n, e, a, b;
+vector<int> lS[MAXV+5];
+bool vis[MAXV+5];
+int matched[MAXV+5];
 
 bool match(int v) {
     vis[v]=1;
@@ -38,14 +36,34 @@ int turboMatching() {
     return ans;
 }
 
+vector<int> findVertexCover() {
+    queue<int> q;
+    for (int i = 0; i < n+m; i++) if (matched[i]==-1) q.push(i);
+    vector<int> d(n+m,inf);
+    while (q.size()) {
+        int v=q.front(); q.pop();
+        for (auto i : lS[v]) {
+            if (d[i]!=inf || i==matched[v]) continue;
+            q.push(matched[i]), d[i]=d[v]+1, d[matched[i]]=d[i]+1;
+        }
+    }
+    vector<int> res;
+    for (int i = 0; i < n; i++)
+        if ((d[i]!=inf && d[i]&1) || (matched[i]!=-1 && d[i]==inf && d[matched[i]]==inf))
+            res.pb(i);
+    return res;
+}
+
 int main() {
-    cin.tie(NULL),cout.tie(NULL),ios::sync_with_stdio(0);
-    cin >> n;
-    for (int i = 0; i < n; i++) cin >> tab[i];
-    cin >> m;
-    for (int i = 0; i < m; i++) cin >> tab2[i];
-    for (int i = 0; i < n; i++) for (int j = 0; j < m; j++) {
-        if (abs(tab[i]-tab2[j])<=1) lS[i].pb(j+n),lS[j+n].pb(i);
+    cin.tie(0),cout.tie(0),ios::sync_with_stdio(0);
+    cin >> n >> m >> e;
+    while (e--) {
+        cin >> a >> b;
+        a--,b--;
+        lS[a].pb(b),lS[b].pb(a);
     }
     cout << turboMatching() << "\n";
+    auto res=findVertexCover();
+    for (auto i : res) cout << i << " ";
+    cout << "\n";
 }
